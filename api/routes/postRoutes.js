@@ -1,15 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/user');
+const postController = require('../controllers/post');
 const path = require('path');
 const multer = require('multer');
 const auth = require('../middlewares/authorization');
 const roles = require('../middlewares/roles');
 const resizeImage = require('../middlewares/resizeImage');
+const fs = require('fs');
+
+const makeDirIfNotExist = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'public/uploads/users');
+      const uploadPath = 'public/uploads/posts';
+      makeDirIfNotExist(uploadPath); // buat folder baru jika folder tidak ditemukan
+      cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
       const filename = `${Date.now()}-${file.originalname}`;
@@ -35,31 +45,29 @@ const upload = multer({
 });
 
 // Menampilkan semua pengguna
-router.get('/', auth, userController.getAllUsers);
+router.get('/', auth, postController.getAllPosts);
 
 // Menampilkan satu pengguna
-router.get('/:id', auth, roles.adminOnly, userController.getUserById);
+router.get('/:id', auth, roles.adminOnly, postController.getPostById);
 
 // Membuat pengguna baru
 router.post(
   '/',
   auth,
-  upload.single('photo'),
-  roles.adminOnly,
-  userController.createUser,
+  upload.single('thumbnail'),
+  resizeImage,
+  postController.createPost,
 );
 
-// Memperbarui pengguna
 router.put(
   '/:id',
   auth,
-  upload.single('photo'),
+  upload.single('thumbnail'),
   resizeImage,
-  roles.adminOnly,
-  userController.updateUser,
+  postController.updatePost,
 );
 
-// Menghapus pengguna
-router.delete('/:id', auth, roles.adminOnly, userController.deleteUser);
+// // Menghapus pengguna
+router.delete('/:id', auth, roles.adminOnly, postController.deletePost);
 
 module.exports = router;

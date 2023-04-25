@@ -3,11 +3,20 @@ const bcrypt = require('bcryptjs');
 
 // fungsi untuk menampilkan semua pengguna
 exports.getAllUsers = async (req, res) => {
+  console.log(req.user);
   try {
-    const users = await User.findAll();
+    let users = '';
+
+    if (req.user.role === 'moderator') {
+      users = await User.findByPk(req.user.id);
+
+      return res.json(users);
+    }
+
+    users = await User.findAll();
+
     res.json(users);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -23,16 +32,31 @@ exports.getUserById = async (req, res) => {
     }
     res.json(user);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 // fungsi untuk membuat pengguna baru
 exports.createUser = async (req, res) => {
-  console.log(req.body);
-  console.log(req.file);
   const { username, password, name, email, role } = req.body;
+
+  const usernameIsExist = await User.findOne({
+    where: {
+      username,
+    },
+  });
+
+  const emailIsExist = await User.findOne({
+    where: {
+      email,
+    },
+  });
+
+  if (usernameIsExist)
+    return res.status(409).json({ error: 'Username already exists' });
+
+  if (emailIsExist)
+    return res.status(409).json({ error: 'Email already exists' });
 
   const salt = bcrypt.genSaltSync(10);
   const passwordHash = bcrypt.hashSync(password, salt);
@@ -53,11 +77,8 @@ exports.createUser = async (req, res) => {
       photo,
     });
 
-    console.log(user);
-
     res.json(user);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -65,9 +86,9 @@ exports.createUser = async (req, res) => {
 // fungsi untuk memperbarui pengguna
 exports.updateUser = async (req, res) => {
   const { id } = req.params;
-  console.log(req.body);
-  console.log(req.file);
   const { username, password, name, email, role } = req.body;
+
+  console.log(req.file);
 
   try {
     const user = await User.findByPk(id);
@@ -77,13 +98,12 @@ exports.updateUser = async (req, res) => {
 
     // hash password
     const salt = bcrypt.genSaltSync(10);
-    console.log(username);
-    console.log(salt);
+
     const passwordHash = bcrypt.hashSync(password, salt);
 
     let photo = '';
     if (req.file) {
-      photo = req.file.filename;
+      photo = '/uploads/users/' + req.file.filename;
     }
 
     // update pengguna
@@ -97,7 +117,6 @@ exports.updateUser = async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -115,7 +134,6 @@ exports.deleteUser = async (req, res) => {
     await user.destroy();
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

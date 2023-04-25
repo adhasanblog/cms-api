@@ -3,38 +3,34 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('media_library', {
       id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      author: {
         type: Sequelize.INTEGER(11),
         allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
       },
-      username: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-        unique: true,
-      },
-      password: {
+      alt_text: {
         type: Sequelize.STRING(255),
-        allowNull: false,
       },
-      name: {
+      description: {
+        type: Sequelize.TEXT,
+      },
+      title: {
         type: Sequelize.STRING(255),
-        allowNull: false,
       },
-      email: {
+      mime_type: {
         type: Sequelize.STRING(255),
-        allowNull: false,
-        unique: true,
       },
-      role: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-      },
-      photo: {
-        type: Sequelize.STRING(255),
-        allowNull: true,
+      media_details: {
+        type: Sequelize.TEXT,
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -52,6 +48,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('media_library');
   },
 };

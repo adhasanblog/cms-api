@@ -3,37 +3,40 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('posts', {
       id: {
         type: Sequelize.INTEGER(11),
-        allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
+        autoIncrement: true,
       },
-      username: {
-        type: Sequelize.STRING(50),
+      user_id: {
+        type: Sequelize.INTEGER(11),
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+      },
+      title: {
+        type: Sequelize.STRING(255),
+        allowNull: false,
+      },
+      slug: {
+        type: Sequelize.STRING(255),
         allowNull: false,
         unique: true,
       },
-      password: {
-        type: Sequelize.STRING(255),
+      content: {
+        type: Sequelize.TEXT,
         allowNull: false,
       },
-      name: {
-        type: Sequelize.STRING(255),
+      status: {
+        type: Sequelize.ENUM('draft', 'published'),
         allowNull: false,
+        defaultValue: 'draft',
       },
-      email: {
-        type: Sequelize.STRING(255),
-        allowNull: false,
-        unique: true,
-      },
-      role: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-      },
-      photo: {
-        type: Sequelize.STRING(255),
+      thumbnail: {
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       createdAt: {
@@ -52,6 +55,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('posts');
   },
 };

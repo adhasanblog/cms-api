@@ -5,19 +5,5 @@
     "database": "apicms_dev",
     "host": "127.0.0.1",
     "dialect": "mysql"
-  },
-  "test": {
-    "username": "supercmsapi",
-    "password": "!A23j4nj1<3UCMS",
-    "database": "apicms_dev",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
-  },
-  "production": {
-    "username": "supercmsapi",
-    "password": "!A23j4nj1<3UCMS",
-    "database": "apicms",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
   }
 }

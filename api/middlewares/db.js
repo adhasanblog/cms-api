@@ -1,19 +1,19 @@
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(
-  'apicms_dev',
-  'supercmsapi',
-  '!A23j4nj1<3UCMS',
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: 'localhost',
+    host: process.env.DB_HOST,
     dialect:
-      'mysql' /* one of 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql' | 'db2' | 'snowflake' | 'oracle' */,
+      process.env
+        .DB_CLIENT /* one of 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql' | 'db2' | 'snowflake' | 'oracle' */,
   },
 );
 
 try {
   sequelize.authenticate();
-  sequelize.sync({ alter: true });
   console.log('Connection has been established successfully.');
 } catch (error) {
   console.error('Unable to connect to the database:', error);

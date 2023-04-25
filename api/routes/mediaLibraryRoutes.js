@@ -1,15 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/user');
+const mediaLibraryController = require('../controllers/mediaLibrary');
 const path = require('path');
 const multer = require('multer');
 const auth = require('../middlewares/authorization');
 const roles = require('../middlewares/roles');
 const resizeImage = require('../middlewares/resizeImage');
+const fs = require('fs');
+
+const makeDirIfNotExist = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'public/uploads/users');
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const uploadPath = `public/uploads/${year}/${month}`;
+      makeDirIfNotExist(uploadPath); // buat folder baru jika folder tidak ditemukan
+      cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
       const filename = `${Date.now()}-${file.originalname}`;
@@ -35,31 +48,20 @@ const upload = multer({
 });
 
 // Menampilkan semua pengguna
-router.get('/', auth, userController.getAllUsers);
+router.get('/', auth, mediaLibraryController.getAllMedia);
 
 // Menampilkan satu pengguna
-router.get('/:id', auth, roles.adminOnly, userController.getUserById);
+router.get('/:id', auth, mediaLibraryController.getMediaById);
 
 // Membuat pengguna baru
 router.post(
   '/',
   auth,
-  upload.single('photo'),
-  roles.adminOnly,
-  userController.createUser,
-);
-
-// Memperbarui pengguna
-router.put(
-  '/:id',
-  auth,
-  upload.single('photo'),
+  upload.single('media_details'),
   resizeImage,
-  roles.adminOnly,
-  userController.updateUser,
+  mediaLibraryController.addMedia,
 );
 
-// Menghapus pengguna
-router.delete('/:id', auth, roles.adminOnly, userController.deleteUser);
+router.delete('/:id', auth, mediaLibraryController.deleteMedia);
 
 module.exports = router;
